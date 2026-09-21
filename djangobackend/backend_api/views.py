@@ -7,27 +7,21 @@ from .serializers import CalendarSerializer, EventSerializer, UserSerializer
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
-    def get_permissions(self):
-        if self.action == "create":
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [permissions.AllowAny]
 
 
 class CalendarViewSet(viewsets.ModelViewSet):
+    queryset = Calendar.objects.all()
     serializer_class = CalendarSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return Calendar.objects.filter(owner=self.request.user)
+    permission_classes = [permissions.AllowAny]
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        # Stage 1: single-user app, no auth yet. Attribute everything to the
+        # one existing user rather than a real authenticated owner.
+        serializer.save(owner=User.objects.first())
 
 
 class EventViewSet(viewsets.ModelViewSet):
+    queryset = Event.objects.all()
     serializer_class = EventSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return Event.objects.filter(calendar__owner=self.request.user)
+    permission_classes = [permissions.AllowAny]
