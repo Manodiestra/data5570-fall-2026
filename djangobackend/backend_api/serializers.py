@@ -38,7 +38,9 @@ class CalendarSerializer(serializers.ModelSerializer):
             "id", "owner", "name", "description", "color", "prod_id",
             "ical_version", "calscale", "timezone", "created_at", "updated_at",
         ]
-        read_only_fields = ["id", "owner", "created_at", "updated_at"]
+        read_only_fields = [
+            "id", "owner", "prod_id", "ical_version", "calscale", "created_at", "updated_at",
+        ]
 
 
 class EventSerializer(serializers.ModelSerializer):
