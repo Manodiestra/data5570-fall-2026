@@ -57,11 +57,17 @@ function withOpacity(variableName) {
       return platformSelect({
         ios: `rgb(var(--${variableName}) / ${opacityValue})`,
         android: `rgb(var(--android-${variableName}) / ${opacityValue})`,
+        // Without an explicit "web" branch, every semantic color (primary,
+        // destructive, etc.) renders as transparent on web — platformSelect's
+        // web runtime only recognizes "web"/"default" keys, and only "web" is
+        // reliably honored by nativewind's web CSS output.
+        web: `rgb(var(--${variableName}) / ${opacityValue})`,
       });
     }
     return platformSelect({
       ios: `rgb(var(--${variableName}))`,
       android: `rgb(var(--android-${variableName}))`,
+      web: `rgb(var(--${variableName}))`,
     });
   };
 }
