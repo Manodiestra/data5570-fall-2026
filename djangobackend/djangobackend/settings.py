@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'backend_api',
 ]
@@ -56,6 +57,7 @@ AUTH_USER_MODEL = 'backend_api.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -64,6 +66,23 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# The Expo web dev server runs on a different origin than the API, so the
+# browser needs explicit CORS approval to call it. Local dev origins are
+# always allowed; everything else must be listed via CORS_ALLOWED_ORIGINS
+# (comma-separated) on the deployed host.
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8081',
+    'http://127.0.0.1:8081',
+    'http://localhost:19006',
+    'http://127.0.0.1:19006',
+]
+CORS_ALLOWED_ORIGINS += [
+    origin.strip()
+    for origin in os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
+    if origin.strip()
+]
+CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 ROOT_URLCONF = 'djangobackend.urls'
 
