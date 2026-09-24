@@ -1,0 +1,62 @@
+// This is an optional configuration file used primarily for debugging purposes when reporting issues.
+// It is safe to delete this file as it does not affect the functionality of your application.
+{
+  "cesVersion": "2.23.3",
+  "projectName": "expo-calendar",
+  "packages": [
+    {
+      "name": "expo-router",
+      "type": "navigation",
+      "options": {
+        "type": "stack"
+      }
+    },
+    {
+      "name": "nativewindui",
+      "type": "styling",
+      "options": {
+        "selectedComponents": [
+          "activity-indicator",
+          "activity-view",
+          "avatar",
+          "button",
+          "date-picker",
+          "picker",
+          "progress-indicator",
+          "ratings-indicator",
+          "slider",
+          "text",
+          "toggle",
+          "action-sheet"
+        ]
+      }
+    },
+    {
+      "name": "react-native-svg",
+      "type": "software-mansion"
+    },
+    {
+      "name": "react-native-keyboard-controller",
+      "type": "software-mansion"
+    }
+  ],
+  "flags": {
+    "noGit": false,
+    "noInstall": false,
+    "overwrite": false,
+    "importAlias": true,
+    "packageManager": "npm",
+    "eas": true,
+    "publish": false
+  },
+  "packageManager": {
+    "type": "npm",
+    "version": "10.9.3"
+  },
+  "os": {
+    "type": "Linux",
+    "platform": "linux",
+    "arch": "x64",
+    "kernelVersion": "6.8.0-139-generic"
+  }
+}

@@ -20,8 +20,10 @@ Phase 1 does **not** implement user authentication. The code base and database a
 ### Front End
 
 - [Expo](https://expo.dev/) for mobile and web, hosted with EAS Hosting
+  - The Expo app lives in `expo-calendar/` (TypeScript, Expo SDK 56, Expo Router, NativeWind/NativewindUI).
+  - It is linked to an EAS project (owner `manodiestra`, slug `expo-calendar`; project ID in `app.json` under `extra.eas.projectId`).
 - [react-hook-form](https://react-hook-form.com/) for forms
-- State management: either [Zustand](https://zustand.docs.pmnd.rs/) or [Redux Toolkit](https://redux-toolkit.js.org/) (not yet decided)
+- State management: [Redux Toolkit](https://redux-toolkit.js.org/) with [RTK Query](https://redux-toolkit.js.org/rtk-query/overview) for fetching and caching data from the Django API
 
 ### Back End
 
@@ -65,3 +67,14 @@ python manage.py runserver
 ```
 
 The API is served under `http://127.0.0.1:8000/api/` (e.g. `GET /api/calendars/`).
+
+### Running the Front End
+
+```bash
+cd expo-calendar
+npm install
+npm run web      # web in the browser
+npm start        # native; uses a development build (expo-dev-client), not Expo Go
+```
+
+EAS builds use the `build:dev`, `build:preview`, and `build:prod` npm scripts (`eas build --profile ...`). These need the [EAS CLI](https://docs.expo.dev/build/setup/) (`npm install -g eas-cli`) and an `eas.json` with those profiles.
