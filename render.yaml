@@ -1,0 +1,34 @@
+# Render Blueprint: the Django API and its Postgres database.
+# https://render.com/docs/blueprint-spec
+databases:
+  - name: calendar-db
+    plan: free
+    databaseName: calendar
+    user: calendar
+
+services:
+  - type: web
+    name: calendar-api
+    runtime: python
+    plan: free
+    rootDir: djangobackend
+    buildCommand: ./build.sh
+    startCommand: gunicorn djangobackend.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      - key: DATABASE_URL
+        fromDatabase:
+          name: calendar-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      # sync: false makes Render ask for these values when the Blueprint is created.
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+      - key: DJANGO_SUPERUSER_DISPLAY_NAME
+        value: Admin
