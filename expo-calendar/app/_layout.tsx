@@ -6,6 +6,7 @@ import { ThemeProvider as NavThemeProvider } from 'expo-router/react-navigation'
 import * as Device from 'expo-device';
 import { Link, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as React from 'react';
 import { Platform, Pressable } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -23,7 +24,16 @@ export {
 const isIos26 = Platform.select({ default: false, ios: Device.osVersion?.startsWith('26.') });
 
 export default function RootLayout() {
-  const { colorScheme, isDarkColorScheme } = useColorScheme();
+  const { colorScheme, isDarkColorScheme, setColorScheme } = useColorScheme();
+
+  // With darkMode: 'class', nativewind on web starts light unless <html> has the `dark` class,
+  // so seed it from the OS preference once on mount.
+  React.useEffect(() => {
+    if (Platform.OS === 'web' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setColorScheme('dark');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setColorScheme is recreated every render
+  }, []);
 
   return (
     <>

@@ -53,6 +53,13 @@ module.exports = {
 
 function withOpacity(variableName) {
   return ({ opacityValue }) => {
+    // nativewind's theme.js treats NATIVEWIND_OS=web as native, so platformSelect() would
+    // emit a native-only CSS function that browsers drop. Emit plain CSS for web instead.
+    if (process.env.NATIVEWIND_OS === 'web') {
+      return opacityValue !== undefined
+        ? `rgb(var(--${variableName}) / ${opacityValue})`
+        : `rgb(var(--${variableName}))`;
+    }
     if (opacityValue !== undefined) {
       return platformSelect({
         ios: `rgb(var(--${variableName}) / ${opacityValue})`,

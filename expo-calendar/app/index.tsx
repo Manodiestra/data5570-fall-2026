@@ -144,34 +144,34 @@ const COMPONENTS: ComponentItem[] = [
     },
   },
 
-  // {
-  //   name: 'Button',
-  //   component: function ButtonExample() {
-  //     function onPress() {
-  //       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  //     }
-  //     return (
-  //       <View className="items-center justify-center gap-4 p-4">
-  //         <Button onPress={onPress}>
-  //           <Icon name="play.fill" className="ios:size-4 text-white" />
-  //           <Text>Primary</Text>
-  //         </Button>
-  //         <Button onPress={onPress} variant="secondary">
-  //           <Text>Secondary</Text>
-  //         </Button>
-  //         <Button onPress={onPress} variant="tonal">
-  //           <Text>Tonal</Text>
-  //         </Button>
-  //         <Button onPress={onPress} variant="plain">
-  //           <Text>Plain</Text>
-  //         </Button>
-  //         <Button onPress={onPress} variant="tonal" size="icon">
-  //           <Icon name="heart.fill" className="ios:text-primary size-5 text-foreground" />
-  //         </Button>
-  //       </View>
-  //     );
-  //   },
-  // },
+  {
+    name: 'Button',
+    component: function ButtonExample() {
+      function onPress() {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      return (
+        <View className="items-center justify-center gap-4 p-4">
+          <Button onPress={onPress}>
+            <Icon name="play.fill" className="ios:size-4 text-white" />
+            <Text>Primary</Text>
+          </Button>
+          <Button onPress={onPress} variant="secondary">
+            <Text>Secondary</Text>
+          </Button>
+          <Button onPress={onPress} variant="tonal">
+            <Text>Tonal</Text>
+          </Button>
+          <Button onPress={onPress} variant="plain">
+            <Text>Plain</Text>
+          </Button>
+          <Button onPress={onPress} variant="tonal" size="icon">
+            <Icon name="heart.fill" className="ios:text-primary size-5 text-foreground" />
+          </Button>
+        </View>
+      );
+    },
+  },
 
   {
     name: 'Slider',
@@ -357,48 +357,48 @@ const COMPONENTS: ComponentItem[] = [
     },
   },
 
-  //   {
-  //    name: 'Text',
-  //     component: function TextExample() {
-  //       return (
-  //        <View className="gap-2">
-  //          <Text variant="largeTitle" className="text-center">
-  //            Large Title
-  //          </Text>
-  //          <Text variant="title1" className="text-center">
-  //            Title 1
-  //          </Text>
-  //          <Text variant="title2" className="text-center">
-  //            Title 2
-  //          </Text>
-  //          <Text variant="title3" className="text-center">
-  //            Title 3
-  //          </Text>
-  //          <Text variant="heading" className="text-center">
-  //            Heading
-  //          </Text>
-  //          <Text variant="body" className="text-center">
-  //            Body
-  //          </Text>
-  //          <Text variant="callout" className="text-center">
-  //            Callout
-  //          </Text>
-  //          <Text variant="subhead" className="text-center">
-  //            Subhead
-  //          </Text>
-  //          <Text variant="footnote" className="text-center">
-  //            Footnote
-  //          </Text>
-  //          <Text variant="caption1" className="text-center">
-  //            Caption 1
-  //          </Text>
-  //          <Text variant="caption2" className="text-center">
-  //            Caption 2
-  //          </Text>
-  //         </View>
-  //       );
-  //     },
-  //   },
+    {
+     name: 'Text',
+      component: function TextExample() {
+        return (
+         <View className="gap-2">
+           <Text variant="largeTitle" className="text-center">
+             Large Title
+           </Text>
+           <Text variant="title1" className="text-center">
+             Title 1
+           </Text>
+           <Text variant="title2" className="text-center">
+             Title 2
+           </Text>
+           <Text variant="title3" className="text-center">
+             Title 3
+           </Text>
+           <Text variant="heading" className="text-center">
+             Heading
+           </Text>
+           <Text variant="body" className="text-center">
+             Body
+           </Text>
+           <Text variant="callout" className="text-center">
+             Callout
+           </Text>
+           <Text variant="subhead" className="text-center">
+             Subhead
+           </Text>
+           <Text variant="footnote" className="text-center">
+             Footnote
+           </Text>
+           <Text variant="caption1" className="text-center">
+             Caption 1
+           </Text>
+           <Text variant="caption2" className="text-center">
+             Caption 2
+           </Text>
+          </View>
+        );
+      },
+    },
 
   {
     name: 'Toggle',
