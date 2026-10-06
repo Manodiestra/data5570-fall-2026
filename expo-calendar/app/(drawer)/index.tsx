@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useHeaderHeight } from 'expo-router/react-navigation';
 import { FlashList } from '@shopify/flash-list';
 import { cssInterop } from 'nativewind';
@@ -15,7 +16,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useActionSheet } from '@expo/react-native-action-sheet';
 
-import * as Haptics from 'expo-haptics';
+import { ButtonCard } from '@/components/ButtonCard';
+import { Card } from '@/components/Card';
+import { SliderCard } from '@/components/SliderCard';
 
 import { ActivityIndicator } from '@/components/nativewindui/ActivityIndicator';
 
@@ -30,8 +33,6 @@ import { Icon } from '@/components/nativewindui/Icon';
 import { Picker, PickerItem } from '@/components/nativewindui/Picker';
 
 import { ProgressIndicator } from '@/components/nativewindui/ProgressIndicator';
-
-import { Slider } from '@/components/nativewindui/Slider';
 
 import { Text } from '@/components/nativewindui/Text';
 
@@ -96,7 +97,8 @@ function ListEmptyComponent() {
   );
 }
 
-type ComponentItem = { name: string; component: React.FC };
+// rendersOwnCard: the component already wraps itself in a Card (so it can be reused on other screens).
+type ComponentItem = { name: string; component: React.FC; rendersOwnCard?: boolean };
 
 function keyExtractor(item: ComponentItem) {
   return item.name;
@@ -107,21 +109,13 @@ function renderItemSeparator() {
 }
 
 function renderItem({ item }: { item: ComponentItem }) {
+  if (item.rendersOwnCard) {
+    return <item.component />;
+  }
   return (
     <Card title={item.name}>
       <item.component />
     </Card>
-  );
-}
-
-function Card({ children, title }: { children: React.ReactNode; title: string }) {
-  return (
-    <View className="px-4">
-      <View className="gap-4 rounded-xl border border-border bg-card p-4 pb-6 shadow-sm shadow-black/10 dark:shadow-none">
-        <Text className="text-center text-sm font-medium tracking-wider opacity-60">{title}</Text>
-        {children}
-      </View>
-    </View>
   );
 }
 
@@ -136,7 +130,7 @@ const COMPONENTS: ComponentItem[] = [
           <Avatar alt="NativewindUI Avatar">
             <AvatarImage source={{ uri: TWITTER_AVATAR_URI }} />
             <AvatarFallback>
-              <Text>NWUI</Text>
+              <Text>X</Text>
             </AvatarFallback>
           </Avatar>
         </View>
@@ -146,43 +140,23 @@ const COMPONENTS: ComponentItem[] = [
 
   {
     name: 'Button',
+    rendersOwnCard: true,
     component: function ButtonExample() {
-      function onPress() {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-      return (
-        <View className="items-center justify-center gap-4 p-4">
-          <Button onPress={onPress}>
-            <Icon name="play.fill" className="ios:size-4 text-white" />
-            <Text>Primary</Text>
-          </Button>
-          <Button onPress={onPress} variant="secondary">
-            <Text>Secondary</Text>
-          </Button>
-          <Button onPress={onPress} variant="tonal">
-            <Text>Tonal</Text>
-          </Button>
-          <Button onPress={onPress} variant="plain">
-            <Text>Plain</Text>
-          </Button>
-          <Button onPress={onPress} variant="tonal" size="icon">
-            <Icon name="heart.fill" className="ios:text-primary size-5 text-foreground" />
-          </Button>
-        </View>
-      );
+      return <ButtonCard onPress={() => router.push('/button')} />;
     },
   },
 
   {
     name: 'Slider',
+    rendersOwnCard: true,
     component: function SliderExample() {
       const [sliderValue, setSliderValue] = React.useState(0.5);
       return (
-        <Slider
-          value={sliderValue}
+        <SliderCard
+          value={.2}
           onValueChange={setSliderValue}
-          minimumValue={0}
-          maximumValue={1}
+          // Pass the current value to the next screen as a route param.
+          onPress={() => router.push({ pathname: '/slider', params: { value: sliderValue } })}
         />
       );
     },
@@ -357,48 +331,48 @@ const COMPONENTS: ComponentItem[] = [
     },
   },
 
-    {
-     name: 'Text',
-      component: function TextExample() {
-        return (
-         <View className="gap-2">
-           <Text variant="largeTitle" className="text-center">
-             Large Title
-           </Text>
-           <Text variant="title1" className="text-center">
-             Title 1
-           </Text>
-           <Text variant="title2" className="text-center">
-             Title 2
-           </Text>
-           <Text variant="title3" className="text-center">
-             Title 3
-           </Text>
-           <Text variant="heading" className="text-center">
-             Heading
-           </Text>
-           <Text variant="body" className="text-center">
-             Body
-           </Text>
-           <Text variant="callout" className="text-center">
-             Callout
-           </Text>
-           <Text variant="subhead" className="text-center">
-             Subhead
-           </Text>
-           <Text variant="footnote" className="text-center">
-             Footnote
-           </Text>
-           <Text variant="caption1" className="text-center">
-             Caption 1
-           </Text>
-           <Text variant="caption2" className="text-center">
-             Caption 2
-           </Text>
-          </View>
-        );
-      },
+  {
+    name: 'Text',
+    component: function TextExample() {
+      return (
+        <View className="gap-2">
+          <Text variant="largeTitle" className="text-center">
+            Large Title
+          </Text>
+          <Text variant="title1" className="text-center">
+            Title 1
+          </Text>
+          <Text variant="title2" className="text-center">
+            Title 2
+          </Text>
+          <Text variant="title3" className="text-center">
+            Title 3
+          </Text>
+          <Text variant="heading" className="text-center">
+            Heading
+          </Text>
+          <Text variant="body" className="text-center">
+            Body
+          </Text>
+          <Text variant="callout" className="text-center">
+            Callout
+          </Text>
+          <Text variant="subhead" className="text-center">
+            Subhead
+          </Text>
+          <Text variant="footnote" className="text-center">
+            Footnote
+          </Text>
+          <Text variant="caption1" className="text-center">
+            Caption 1
+          </Text>
+          <Text variant="caption2" className="text-center">
+            Caption 2
+          </Text>
+        </View>
+      );
     },
+  },
 
   {
     name: 'Toggle',
