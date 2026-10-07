@@ -100,7 +100,7 @@ export const calendarApi = createApi({
       query: (body) => ({ url: 'events/', method: 'POST', body }),
       invalidatesTags: [{ type: 'Event', id: 'LIST' }],
     }),
-    updateEvent: builder.mutation<Event, { id: number; changes: EventInput }>({
+    updateEvent: builder.mutation<Event, { id: number; changes: Partial<EventInput> }>({
       query: ({ id, changes }) => ({ url: `events/${id}/`, method: 'PATCH', body: changes }),
       invalidatesTags: (_result, _error, { id }) => [
         { type: 'Event', id },
