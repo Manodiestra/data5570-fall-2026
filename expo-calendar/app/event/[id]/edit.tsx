@@ -1,19 +1,20 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 
 import { EventForm, type EventFormValues } from '@/components/calendar/EventForm';
 import { Text } from '@/components/nativewindui/Text';
-import { useGetEventQuery, useUpdateEventMutation } from '@/store/api';
+import { selectEventById, updateEvent } from '@/store/eventsSlice';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 export default function EditEventScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const eventId = Number(id);
-  const { data: event, isLoading } = useGetEventQuery(eventId);
-  const [updateEvent, { isLoading: isSaving }] = useUpdateEventMutation();
+  const event = useAppSelector(selectEventById(eventId));
+  const dispatch = useAppDispatch();
 
-  async function handleSubmit(values: EventFormValues) {
-    try {
-      await updateEvent({
+  function handleSubmit(values: EventFormValues) {
+    dispatch(
+      updateEvent({
         id: eventId,
         changes: {
           calendar: values.calendar as number,
@@ -25,17 +26,15 @@ export default function EditEventScreen() {
           dtstart: values.dtstart.toISOString(),
           dtend: values.dtend.toISOString(),
         },
-      }).unwrap();
-      router.back();
-    } catch (error) {
-      Alert.alert('Could not save event', String(error));
-    }
+      })
+    );
+    router.back();
   }
 
-  if (isLoading || !event) {
+  if (!event) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <Text color="tertiary">Loading…</Text>
+        <Text color="tertiary">Event not found.</Text>
       </View>
     );
   }
@@ -43,7 +42,6 @@ export default function EditEventScreen() {
   return (
     <EventForm
       submitLabel="Save Changes"
-      isSubmitting={isSaving}
       defaultValues={{
         summary: event.summary,
         location: event.location ?? '',

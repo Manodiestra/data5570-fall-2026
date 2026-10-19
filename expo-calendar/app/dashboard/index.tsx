@@ -1,25 +1,54 @@
-import { addMonths, format, subMonths } from 'date-fns';
+import { addMonths, format, isSameDay, parseISO, subMonths } from 'date-fns';
 import { router } from 'expo-router';
 import * as React from 'react';
-import { View } from 'react-native';
+import { Alert, Platform, View } from 'react-native';
 
 import { MonthCalendar } from '@/components/calendar/MonthCalendar';
 import { Button } from '@/components/nativewindui/Button';
 import { Icon } from '@/components/nativewindui/Icon';
 import { Text } from '@/components/nativewindui/Text';
-import { useGetCalendarsQuery, useGetEventsQuery } from '@/store/api';
+import { selectCalendars } from '@/store/calendarsSlice';
+import { selectEvents } from '@/store/eventsSlice';
 import { useAppSelector } from '@/store/hooks';
 
 export default function DashboardScreen() {
   const [currentMonth, setCurrentMonth] = React.useState(() => new Date());
-  const { data: events = [] } = useGetEventsQuery();
-  const { data: calendars = [] } = useGetCalendarsQuery();
-  const selectedCalendarIds = useAppSelector((state) => state.ui.selectedCalendarIds);
+  const events = useAppSelector(selectEvents);
+  const calendars = useAppSelector(selectCalendars);
+  const hiddenCalendarIds = useAppSelector((state) => state.ui.hiddenCalendarIds);
 
   const visibleEvents = React.useMemo(
-    () => events.filter((event) => selectedCalendarIds.includes(event.calendar)),
-    [events, selectedCalendarIds]
+    () => events.filter((event) => !hiddenCalendarIds.includes(event.calendar)),
+    [events, hiddenCalendarIds]
   );
+
+  console.log("OUR CALENDARS", calendars)
+
+  // Prompt once per visit to the dashboard if nothing is scheduled for today.
+  const hasPromptedRef = React.useRef(false);
+  React.useEffect(() => {
+    if (hasPromptedRef.current) return;
+    hasPromptedRef.current = true;
+
+    const today = new Date();
+    const hasEventToday = events.some((event) => isSameDay(parseISO(event.dtstart), today));
+    if (hasEventToday) return;
+
+    const goToNewEvent = () =>
+      router.push({ pathname: '/event/new', params: { date: format(today, 'yyyy-MM-dd') } });
+    const message = 'You have no events today. Would you like to add one?';
+
+    // Alert.alert is a no-op on react-native-web, so fall back to the browser dialog.
+    if (Platform.OS === 'web') {
+      if (window.confirm(message)) goToNewEvent();
+      return;
+    }
+    Alert.alert('No events today', message, [
+      { text: 'Not now', style: 'cancel' },
+      { text: 'Add event', onPress: goToNewEvent },
+    ]);
+  }, []);
+
 
   return (
     <View className="flex-1 bg-background">

@@ -1,13 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import * as React from 'react';
-import { Alert } from 'react-native';
 
 import { EventForm, type EventFormValues } from '@/components/calendar/EventForm';
-import { useCreateEventMutation } from '@/store/api';
+import { createEvent } from '@/store/eventsSlice';
+import { useAppDispatch } from '@/store/hooks';
 
 export default function NewEventScreen() {
   const { date } = useLocalSearchParams<{ date?: string }>();
-  const [createEvent, { isLoading }] = useCreateEventMutation();
+  const dispatch = useAppDispatch();
 
   // date comes from tapping an empty day cell (yyyy-MM-dd); default to 9am
   // on that day, or "right now" when opened from the New Event button.
@@ -22,9 +22,9 @@ export default function NewEventScreen() {
     [defaultDtstart]
   );
 
-  async function handleSubmit(values: EventFormValues) {
-    try {
-      await createEvent({
+  function handleSubmit(values: EventFormValues) {
+    dispatch(
+      createEvent({
         calendar: values.calendar as number,
         summary: values.summary,
         location: values.location || undefined,
@@ -33,17 +33,14 @@ export default function NewEventScreen() {
         is_all_day: values.is_all_day,
         dtstart: values.dtstart.toISOString(),
         dtend: values.dtend.toISOString(),
-      }).unwrap();
-      router.back();
-    } catch (error) {
-      Alert.alert('Could not create event', String(error));
-    }
+      })
+    );
+    router.back();
   }
 
   return (
     <EventForm
       submitLabel="Create Event"
-      isSubmitting={isLoading}
       defaultValues={{ dtstart: defaultDtstart, dtend: defaultDtend }}
       onSubmit={handleSubmit}
     />

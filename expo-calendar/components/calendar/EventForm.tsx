@@ -9,7 +9,9 @@ import { Text } from '@/components/nativewindui/Text';
 import { TextField } from '@/components/nativewindui/TextField';
 import { Toggle } from '@/components/nativewindui/Toggle';
 import { useColorScheme } from '@/lib/useColorScheme';
-import { useGetCalendarsQuery, type EventStatus } from '@/store/api';
+import { selectCalendars } from '@/store/calendarsSlice';
+import type { EventStatus } from '@/store/eventsSlice';
+import { useAppSelector } from '@/store/hooks';
 
 export type EventFormValues = {
   summary: string;
@@ -33,7 +35,7 @@ interface EventFormProps {
 
 export function EventForm({ defaultValues, submitLabel, isSubmitting, onSubmit }: EventFormProps) {
   const { colors } = useColorScheme();
-  const { data: calendars = [] } = useGetCalendarsQuery();
+  const calendars = useAppSelector(selectCalendars);
 
   const {
     control,
@@ -113,7 +115,7 @@ export function EventForm({ defaultValues, submitLabel, isSubmitting, onSubmit }
         />
         {calendars.length === 0 && (
           <Text variant="footnote" color="tertiary">
-            No calendars yet — create one in the admin before adding events.
+            No calendars yet — create one from the drawer before adding events.
           </Text>
         )}
       </View>

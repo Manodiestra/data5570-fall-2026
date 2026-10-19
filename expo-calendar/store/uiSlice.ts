@@ -1,32 +1,27 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface UiState {
-  selectedCalendarIds: number[];
-  initialized: boolean;
+  // Track hidden calendars rather than selected ones, so every calendar
+  // (including newly created ones) is visible by default.
+  hiddenCalendarIds: number[];
 }
 
 const initialState: UiState = {
-  selectedCalendarIds: [],
-  initialized: false,
+  hiddenCalendarIds: [],
 };
 
 const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    // Called once the calendar list first loads, to select everything by default.
-    initializeSelectedCalendars(state, action: PayloadAction<number[]>) {
-      state.selectedCalendarIds = action.payload;
-      state.initialized = true;
-    },
     toggleCalendarSelected(state, action: PayloadAction<number>) {
       const id = action.payload;
-      state.selectedCalendarIds = state.selectedCalendarIds.includes(id)
-        ? state.selectedCalendarIds.filter((existingId) => existingId !== id)
-        : [...state.selectedCalendarIds, id];
+      state.hiddenCalendarIds = state.hiddenCalendarIds.includes(id)
+        ? state.hiddenCalendarIds.filter((existingId) => existingId !== id)
+        : [...state.hiddenCalendarIds, id];
     },
   },
 });
 
-export const { initializeSelectedCalendars, toggleCalendarSelected } = uiSlice.actions;
+export const { toggleCalendarSelected } = uiSlice.actions;
 export default uiSlice.reducer;

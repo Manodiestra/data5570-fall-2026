@@ -15,7 +15,8 @@ import { Platform, Pressable, View } from 'react-native';
 import { Text } from '@/components/nativewindui/Text';
 import { cn } from '@/lib/cn';
 import { useColorScheme } from '@/lib/useColorScheme';
-import type { Calendar, Event } from '@/store/api';
+import type { Calendar } from '@/store/calendarsSlice';
+import type { Event } from '@/store/eventsSlice';
 
 const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 

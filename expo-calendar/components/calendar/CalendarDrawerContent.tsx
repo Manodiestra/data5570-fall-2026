@@ -1,28 +1,20 @@
 import { DrawerContentScrollView, type DrawerContentComponentProps } from 'expo-router/drawer';
 import { router } from 'expo-router';
-import * as React from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Icon } from '@/components/nativewindui/Icon';
 import { Text } from '@/components/nativewindui/Text';
 import { Toggle } from '@/components/nativewindui/Toggle';
 import { useColorScheme } from '@/lib/useColorScheme';
-import { useGetCalendarsQuery } from '@/store/api';
+import { selectCalendars } from '@/store/calendarsSlice';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { initializeSelectedCalendars, toggleCalendarSelected } from '@/store/uiSlice';
+import { toggleCalendarSelected } from '@/store/uiSlice';
 
 export function CalendarDrawerContent(props: DrawerContentComponentProps) {
-  const { data: calendars = [], isLoading } = useGetCalendarsQuery();
+  const calendars = useAppSelector(selectCalendars);
   const { colors } = useColorScheme();
   const dispatch = useAppDispatch();
-  const selectedCalendarIds = useAppSelector((state) => state.ui.selectedCalendarIds);
-  const initialized = useAppSelector((state) => state.ui.initialized);
-
-  React.useEffect(() => {
-    if (!initialized && calendars.length > 0) {
-      dispatch(initializeSelectedCalendars(calendars.map((calendar) => calendar.id)));
-    }
-  }, [initialized, calendars, dispatch]);
+  const hiddenCalendarIds = useAppSelector((state) => state.ui.hiddenCalendarIds);
 
   return (
     <View className="flex-1 bg-background">
@@ -33,12 +25,7 @@ export function CalendarDrawerContent(props: DrawerContentComponentProps) {
           </Text>
         </View>
 
-        {isLoading && (
-          <Text color="tertiary" className="px-4">
-            Loading…
-          </Text>
-        )}
-        {!isLoading && calendars.length === 0 && (
+        {calendars.length === 0 && (
           <Text color="tertiary" className="px-4">
             No calendars yet.
           </Text>
@@ -59,7 +46,7 @@ export function CalendarDrawerContent(props: DrawerContentComponentProps) {
               </Text>
             </View>
             <Toggle
-              value={selectedCalendarIds.includes(calendar.id)}
+              value={!hiddenCalendarIds.includes(calendar.id)}
               onValueChange={() => {
                 dispatch(toggleCalendarSelected(calendar.id));
               }}
