@@ -118,6 +118,8 @@ const ANDROID_COLORS = {
   },
 } as const;
 
-const COLORS = Platform.OS === 'ios' ? IOS_SYSTEM_COLORS : ANDROID_COLORS;
+// Only Android gets its own palette; iOS and web share the default one
+// (Platform.OS === 'web' previously fell through to ANDROID_COLORS here).
+const COLORS = Platform.OS === 'android' ? ANDROID_COLORS : IOS_SYSTEM_COLORS;
 
 export { COLORS };

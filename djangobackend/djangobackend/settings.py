@@ -29,7 +29,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY') or 'django-insecure-f*d91^21@jcu)8jln#
 # Defaults to True for local development; set DEBUG=False on deployed hosts.
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '50.17.146.159']
 CSRF_TRUSTED_ORIGINS = []
 
 # Render sets RENDER_EXTERNAL_HOSTNAME to the service's public hostname.

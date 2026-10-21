@@ -111,7 +111,26 @@ function Button({
   androidRootClassName,
   ...props
 }: ButtonProps) {
-  const { colorScheme } = useColorScheme();
+  const { colorScheme, colors } = useColorScheme();
+
+  // nativewind's web build emits `platformSelect(...)` as literal
+  // (unparseable) CSS text for CSS-variable-based colors — see withOpacity()
+  // in tailwind.config.js — so bg-primary etc. render as transparent on web.
+  // Route around it with real inline colors, web only; native keeps using
+  // the (working) Tailwind classes untouched.
+  const webStyle =
+    Platform.OS === 'web'
+      ? variant === 'primary'
+        ? { backgroundColor: colors.primary }
+        : variant === 'tonal'
+          ? { backgroundColor: withOpacity(colors.primary, 0.15) }
+          : variant === 'secondary'
+            ? { borderColor: withOpacity(colors.foreground, 0.4) }
+            : undefined
+      : undefined;
+
+  const resolvedStyle =
+    typeof style === 'function' ? (state: Parameters<typeof style>[0]) => [style(state), webStyle] : [style, webStyle];
 
   return (
     <TextClassContext.Provider value={buttonTextVariants({ variant, size })}>
@@ -128,7 +147,7 @@ function Button({
             props.disabled && 'opacity-50',
             buttonVariants({ variant, size, className })
           )}
-          style={style}
+          style={resolvedStyle}
           android_ripple={ANDROID_RIPPLE[colorScheme][variant]}
           {...props}
         />
