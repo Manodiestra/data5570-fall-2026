@@ -9,9 +9,8 @@ import { Text } from '@/components/nativewindui/Text';
 import { TextField } from '@/components/nativewindui/TextField';
 import { Toggle } from '@/components/nativewindui/Toggle';
 import { useColorScheme } from '@/lib/useColorScheme';
-import { selectCalendars } from '@/store/calendarsSlice';
-import type { EventStatus } from '@/store/eventsSlice';
-import { useAppSelector } from '@/store/hooks';
+import { useGetCalendarsQuery } from '@/store/api';
+import type { EventStatus } from '@/store/types';
 
 export type EventFormValues = {
   summary: string;
@@ -35,7 +34,7 @@ interface EventFormProps {
 
 export function EventForm({ defaultValues, submitLabel, isSubmitting, onSubmit }: EventFormProps) {
   const { colors } = useColorScheme();
-  const calendars = useAppSelector(selectCalendars);
+  const { data: calendars = [] } = useGetCalendarsQuery();
 
   const {
     control,

@@ -1,12 +1,11 @@
 import { router } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
-import { ScrollView } from 'react-native';
+import { Alert, ScrollView } from 'react-native';
 
 import { Button } from '@/components/nativewindui/Button';
 import { Text } from '@/components/nativewindui/Text';
 import { TextField } from '@/components/nativewindui/TextField';
-import { createCalendar } from '@/store/calendarsSlice';
-import { useAppDispatch } from '@/store/hooks';
+import { useCreateCalendarMutation } from '@/store/api';
 
 type CalendarFormValues = {
   name: string;
@@ -15,7 +14,7 @@ type CalendarFormValues = {
 };
 
 export default function NewCalendarScreen() {
-  const dispatch = useAppDispatch();
+  const [createCalendar, { isLoading }] = useCreateCalendarMutation();
   const {
     control,
     handleSubmit,
@@ -24,15 +23,17 @@ export default function NewCalendarScreen() {
     defaultValues: { name: '', color: '', description: '' },
   });
 
-  function handleFormSubmit(values: CalendarFormValues) {
-    dispatch(
-      createCalendar({
+  async function handleFormSubmit(values: CalendarFormValues) {
+    try {
+      await createCalendar({
         name: values.name,
         color: values.color || undefined,
         description: values.description || undefined,
-      })
-    );
-    router.back();
+      }).unwrap();
+      router.back();
+    } catch {
+      Alert.alert('Could not create calendar', 'Please try again.');
+    }
   }
 
   return (
@@ -85,7 +86,7 @@ export default function NewCalendarScreen() {
         )}
       />
 
-      <Button onPress={handleSubmit(handleFormSubmit)} >
+      <Button onPress={handleSubmit(handleFormSubmit)} disabled={isLoading}>
         <Text>Create Calendar</Text>
       </Button>
     </ScrollView>

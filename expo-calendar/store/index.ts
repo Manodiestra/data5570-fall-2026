@@ -1,15 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 
-import calendarsReducer from './calendarsSlice';
-import eventsReducer from './eventsSlice';
+import { api } from './api';
 import uiReducer from './uiSlice';
 
 export const store = configureStore({
   reducer: {
-    calendars: calendarsReducer,
-    events: eventsReducer,
+    [api.reducerPath]: api.reducer,
     ui: uiReducer,
   },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

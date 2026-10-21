@@ -1,34 +1,49 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 
 import { EventForm, type EventFormValues } from '@/components/calendar/EventForm';
+import { ActivityIndicator } from '@/components/nativewindui/ActivityIndicator';
 import { Text } from '@/components/nativewindui/Text';
-import { selectEventById, updateEvent } from '@/store/eventsSlice';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useGetEventQuery, useUpdateEventMutation } from '@/store/api';
 
 export default function EditEventScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const eventId = Number(id);
-  const event = useAppSelector(selectEventById(eventId));
-  const dispatch = useAppDispatch();
+  const { data: event, isLoading } = useGetEventQuery(eventId);
+  const [updateEvent, { isLoading: isSaving }] = useUpdateEventMutation();
 
-  function handleSubmit(values: EventFormValues) {
-    dispatch(
-      updateEvent({
+  async function handleSubmit(values: EventFormValues) {
+    if (!event) return;
+    try {
+      await updateEvent({
         id: eventId,
         changes: {
           calendar: values.calendar as number,
           summary: values.summary,
-          location: values.location || undefined,
-          description: values.description || undefined,
+          // null (not undefined) so clearing a field actually clears it on
+          // the server; undefined keys are dropped from the JSON body.
+          location: values.location || null,
+          description: values.description || null,
           status: values.status,
           is_all_day: values.is_all_day,
           dtstart: values.dtstart.toISOString(),
           dtend: values.dtend.toISOString(),
+          // RFC 5545: bump SEQUENCE on each revision.
+          sequence: event.sequence + 1,
         },
-      })
+      }).unwrap();
+      router.back();
+    } catch {
+      Alert.alert('Could not save event', 'Please try again.');
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-background">
+        <ActivityIndicator />
+      </View>
     );
-    router.back();
   }
 
   if (!event) {
@@ -42,6 +57,7 @@ export default function EditEventScreen() {
   return (
     <EventForm
       submitLabel="Save Changes"
+      isSubmitting={isSaving}
       defaultValues={{
         summary: event.summary,
         location: event.location ?? '',

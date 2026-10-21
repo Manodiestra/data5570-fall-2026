@@ -6,12 +6,12 @@ import { Icon } from '@/components/nativewindui/Icon';
 import { Text } from '@/components/nativewindui/Text';
 import { Toggle } from '@/components/nativewindui/Toggle';
 import { useColorScheme } from '@/lib/useColorScheme';
-import { selectCalendars } from '@/store/calendarsSlice';
+import { useGetCalendarsQuery } from '@/store/api';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleCalendarSelected } from '@/store/uiSlice';
 
 export function CalendarDrawerContent(props: DrawerContentComponentProps) {
-  const calendars = useAppSelector(selectCalendars);
+  const { data: calendars = [] } = useGetCalendarsQuery();
   const { colors } = useColorScheme();
   const dispatch = useAppDispatch();
   const hiddenCalendarIds = useAppSelector((state) => state.ui.hiddenCalendarIds);

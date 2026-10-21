@@ -7,14 +7,13 @@ import { MonthCalendar } from '@/components/calendar/MonthCalendar';
 import { Button } from '@/components/nativewindui/Button';
 import { Icon } from '@/components/nativewindui/Icon';
 import { Text } from '@/components/nativewindui/Text';
-import { selectCalendars } from '@/store/calendarsSlice';
-import { selectEvents } from '@/store/eventsSlice';
+import { useGetCalendarsQuery, useGetEventsQuery } from '@/store/api';
 import { useAppSelector } from '@/store/hooks';
 
 export default function DashboardScreen() {
   const [currentMonth, setCurrentMonth] = React.useState(() => new Date());
-  const events = useAppSelector(selectEvents);
-  const calendars = useAppSelector(selectCalendars);
+  const { data: events = [], isSuccess: eventsLoaded } = useGetEventsQuery();
+  const { data: calendars = [] } = useGetCalendarsQuery();
   const hiddenCalendarIds = useAppSelector((state) => state.ui.hiddenCalendarIds);
 
   const visibleEvents = React.useMemo(
@@ -26,8 +25,9 @@ export default function DashboardScreen() {
 
   // Prompt once per visit to the dashboard if nothing is scheduled for today.
   const hasPromptedRef = React.useRef(false);
+  // Wait for events to load so we don't prompt based on an empty list.
   React.useEffect(() => {
-    if (hasPromptedRef.current) return;
+    if (!eventsLoaded || hasPromptedRef.current) return;
     hasPromptedRef.current = true;
 
     const today = new Date();
@@ -47,7 +47,7 @@ export default function DashboardScreen() {
       { text: 'Not now', style: 'cancel' },
       { text: 'Add event', onPress: goToNewEvent },
     ]);
-  }, []);
+  }, [eventsLoaded, events]);
 
 
   return (

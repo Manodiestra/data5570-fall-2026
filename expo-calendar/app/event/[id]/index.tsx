@@ -2,19 +2,18 @@ import { format } from 'date-fns';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Alert, ScrollView, View } from 'react-native';
 
+import { ActivityIndicator } from '@/components/nativewindui/ActivityIndicator';
 import { Button } from '@/components/nativewindui/Button';
 import { Text } from '@/components/nativewindui/Text';
 import { useColorScheme } from '@/lib/useColorScheme';
-import { selectCalendars } from '@/store/calendarsSlice';
-import { deleteEvent, selectEventById } from '@/store/eventsSlice';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useDeleteEventMutation, useGetCalendarsQuery, useGetEventQuery } from '@/store/api';
 
 export default function EventDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const eventId = Number(id);
-  const event = useAppSelector(selectEventById(eventId));
-  const calendars = useAppSelector(selectCalendars);
-  const dispatch = useAppDispatch();
+  const { data: event, isLoading } = useGetEventQuery(eventId);
+  const { data: calendars = [] } = useGetCalendarsQuery();
+  const [deleteEvent] = useDeleteEventMutation();
   const { colors } = useColorScheme();
 
   const calendar = calendars.find((c) => c.id === event?.calendar);
@@ -25,12 +24,24 @@ export default function EventDetailsScreen() {
       {
         text: 'Delete',
         style: 'destructive',
-        onPress: () => {
-          dispatch(deleteEvent(eventId));
-          router.back();
+        onPress: async () => {
+          try {
+            await deleteEvent(eventId).unwrap();
+            router.back();
+          } catch {
+            Alert.alert('Could not delete event', 'Please try again.');
+          }
         },
       },
     ]);
+  }
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-background">
+        <ActivityIndicator />
+      </View>
+    );
   }
 
   if (!event) {
