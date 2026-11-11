@@ -3,16 +3,18 @@ import '@/global.css';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 
 import { ThemeProvider as NavThemeProvider } from 'expo-router/react-navigation';
-import * as Device from 'expo-device';
-import { Link, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { Platform, Pressable } from 'react-native';
+import { useEffect } from 'react';
+import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Provider as ReduxProvider } from 'react-redux';
 
-import { Icon } from '@/components/nativewindui/Icon';
-import { ThemeToggle } from '@/components/nativewindui/ThemeToggle';
-import { cn } from '@/lib/cn';
+import { AuthListener } from '@/components/auth/AuthListener';
 import { useColorScheme } from '@/lib/useColorScheme';
+import { store } from '@/store';
+import { useAppSelector } from '@/store/hooks';
 import { NAV_THEME } from '@/theme';
 
 export {
@@ -20,54 +22,71 @@ export {
   ErrorBoundary,
 } from 'expo-router';
 
-const isIos26 = Platform.select({ default: false, ios: Device.osVersion?.startsWith('26.') });
+// Keep the splash screen up until we know whether there's a saved session, so
+// signed-in users don't see the login screen flash on launch.
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const { colorScheme, isDarkColorScheme } = useColorScheme();
 
   return (
-    <>
+    <ReduxProvider store={store}>
+      <AuthListener />
       <StatusBar
         key={`root-status-bar-${isDarkColorScheme ? 'light' : 'dark'}`}
         style={isDarkColorScheme ? 'light' : 'dark'}
       />
-      {/* WRAP YOUR APP WITH ANY ADDITIONAL PROVIDERS HERE */}
-      {/* <ExampleProvider> */}
       <GestureHandlerRootView style={{ flex: 1 }}>
         <ActionSheetProvider>
           <NavThemeProvider value={NAV_THEME[colorScheme]}>
-            <Stack>
-              <Stack.Screen name="index" options={INDEX_OPTIONS} />
-              <Stack.Screen name="modal" options={MODAL_OPTIONS} />
-            </Stack>
+            <RootNavigator />
           </NavThemeProvider>
         </ActionSheetProvider>
       </GestureHandlerRootView>
-      {/* </ExampleProvider> */}
+    </ReduxProvider>
+  );
+}
+
+function RootNavigator() {
+  const authStatus = useAppSelector((state) => state.auth.status);
+  const isSignedIn = authStatus === 'signedIn';
+  const isLoading = authStatus === 'loading';
+
+  useEffect(() => {
+    if (!isLoading) {
+      SplashScreen.hideAsync();
+    }
+  }, [isLoading]);
+
+  // When a guard turns false, the router redirects to the first screen that's
+  // still allowed. Signing in lands on the dashboard; signing out lands on
+  // the login screen.
+  return (
+    <>
+      <Stack>
+        <Stack.Protected guard={isSignedIn}>
+          <Stack.Screen name="dashboard" options={{ headerShown: false }} />
+          <Stack.Screen name="event/new" options={{ presentation: 'modal', title: 'New Event' }} />
+          <Stack.Screen
+            name="event/[id]/index"
+            options={{ presentation: 'modal', title: 'Event' }}
+          />
+          <Stack.Screen
+            name="event/[id]/edit"
+            options={{ presentation: 'modal', title: 'Edit Event' }}
+          />
+          <Stack.Screen
+            name="calendar/new"
+            options={{ presentation: 'modal', title: 'New Calendar' }}
+          />
+        </Stack.Protected>
+        <Stack.Protected guard={!isSignedIn}>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+        </Stack.Protected>
+      </Stack>
+      {/* The splash screen covers this on native; web has no splash screen,
+          so cover the login screen until the session is restored. */}
+      {isLoading && <View className="absolute inset-0 bg-background" />}
     </>
   );
 }
-
-const INDEX_OPTIONS = {
-  headerLargeTitle: true,
-  headerTransparent: isIos26,
-  title: 'NativewindUI',
-  headerRight: () => <SettingsIcon />,
-} as const;
-
-function SettingsIcon() {
-  return (
-    <Link href="/modal" asChild>
-      <Pressable className={cn('opacity-80 active:opacity-50', isIos26 && 'px-1.5')}>
-        <Icon name="gearshape" className="text-foreground" />
-      </Pressable>
-    </Link>
-  );
-}
-
-const MODAL_OPTIONS = {
-  presentation: 'modal',
-  animation: 'fade_from_bottom', // for android
-  title: 'Settings',
-  headerRight: () => <ThemeToggle />,
-} as const;

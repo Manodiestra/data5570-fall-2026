@@ -4,31 +4,11 @@ from .models import Calendar, Event, User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=False)
-
     class Meta:
         model = User
-        fields = ["id", "email", "display_name", "timezone", "password", "created_at", "updated_at"]
-        read_only_fields = ["id", "created_at", "updated_at"]
-
-    def create(self, validated_data):
-        password = validated_data.pop("password", None)
-        user = User(**validated_data)
-        if password:
-            user.set_password(password)
-        else:
-            user.set_unusable_password()
-        user.save()
-        return user
-
-    def update(self, instance, validated_data):
-        password = validated_data.pop("password", None)
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        if password:
-            instance.set_password(password)
-        instance.save()
-        return instance
+        fields = ["id", "email", "display_name", "timezone", "created_at", "updated_at"]
+        # Supabase owns the email address and password.
+        read_only_fields = ["id", "email", "created_at", "updated_at"]
 
 
 class CalendarSerializer(serializers.ModelSerializer):
@@ -52,7 +32,14 @@ class EventSerializer(serializers.ModelSerializer):
             "exdate", "recurrence_id", "sequence", "status", "transp", "classification",
             "priority", "categories", "url", "created_at", "updated_at", "dtstamp",
         ]
-        read_only_fields = ["id", "uid", "created_at", "updated_at", "dtstamp"]
+        # organizer is set to the creating user in EventViewSet.perform_create.
+        read_only_fields = ["id", "uid", "organizer", "created_at", "updated_at", "dtstamp"]
+
+    def validate_calendar(self, calendar):
+        # Without this, a user could add events to someone else's calendar by id.
+        if calendar.owner_id != self.context["request"].user.pk:
+            raise serializers.ValidationError("Calendar not found.")
+        return calendar
 
     def validate(self, attrs):
         dtend = attrs.get("dtend", getattr(self.instance, "dtend", None))

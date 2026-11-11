@@ -28,10 +28,17 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
-    """Application account. `password` (inherited) stores the password hash."""
+    """Application account. `password` (inherited) stores the password hash.
+
+    App users sign in through Supabase and get an unusable password; their
+    `supabase_id` links them to the Supabase auth user. Admin accounts made
+    with `createsuperuser` keep a password for the Django admin and have no
+    `supabase_id`.
+    """
 
     username = None
     email = models.EmailField(unique=True)
+    supabase_id = models.UUIDField(unique=True, null=True, blank=True, editable=False)
     display_name = models.CharField(max_length=255)
     timezone = models.CharField(max_length=64, default="UTC")
     created_at = models.DateTimeField(auto_now_add=True)

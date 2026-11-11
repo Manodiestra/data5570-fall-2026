@@ -1,31 +1,37 @@
-# Render Blueprint: the Django API and its Postgres database.
+# Render Blueprint: the Django API. The database is Supabase Postgres, so
+# there's no Render database here.
 # https://render.com/docs/blueprint-spec
-databases:
-  - name: calendar-db
-    plan: free
-    databaseName: calendar
-    user: calendar
-
 services:
   - type: web
     name: calendar-api
     runtime: python
     plan: free
+    # Keep this close to your Supabase project's region (e.g. Supabase
+    # us-west-1 -> oregon, us-east-1 -> virginia); every query crosses it.
+    region: oregon
     rootDir: djangobackend
     buildCommand: ./build.sh
     startCommand: gunicorn djangobackend.wsgi:application
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.3
-      - key: DATABASE_URL
-        fromDatabase:
-          name: calendar-db
-          property: connectionString
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
         value: "False"
       # sync: false makes Render ask for these values when the Blueprint is created.
+      # Supabase -> Connect -> "Session pooler" connection string, with your
+      # database password filled in. (The direct connection is IPv6-only on
+      # Supabase's free plan, and Render can't reach it.)
+      - key: DATABASE_URL
+        sync: false
+      # Supabase -> Project Settings -> Data API -> Project URL.
+      - key: SUPABASE_URL
+        sync: false
+      # Comma-separated origins of any deployed Expo web app. Native apps
+      # don't need CORS. Leave blank if you have none.
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
       - key: DJANGO_SUPERUSER_EMAIL
         sync: false
       - key: DJANGO_SUPERUSER_PASSWORD

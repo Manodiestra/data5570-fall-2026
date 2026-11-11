@@ -14,9 +14,14 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Local development reads settings from djangobackend/.env (see .env.example).
+# Render sets real environment variables, which take precedence.
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -29,7 +34,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY') or 'django-insecure-f*d91^21@jcu)8jln#
 # Defaults to True for local development; set DEBUG=False on deployed hosts.
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '50.17.146.159']
 CSRF_TRUSTED_ORIGINS = []
 
 # Render sets RENDER_EXTERNAL_HOSTNAME to the service's public hostname.
@@ -107,12 +112,36 @@ WSGI_APPLICATION = 'djangobackend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-# Uses DATABASE_URL when set (e.g. Render Postgres), otherwise local SQLite.
+# Uses DATABASE_URL when set (the Supabase Postgres session pooler in
+# production), otherwise local SQLite. Supabase requires SSL.
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
+        conn_health_checks=True,
+        ssl_require=os.environ.get('DATABASE_URL', '').startswith('postgres'),
     )
+}
+
+
+# Authentication
+# The Expo app signs users in with Supabase Auth and sends the access token as
+# `Authorization: Bearer <token>`; SupabaseJWTAuthentication verifies it.
+# SessionAuthentication keeps the browsable API usable after logging in to
+# /admin/.
+
+SUPABASE_URL = os.environ.get('SUPABASE_URL', '').rstrip('/')
+if not SUPABASE_URL:
+    raise RuntimeError('Set SUPABASE_URL, e.g. https://your-project-ref.supabase.co')
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'backend_api.authentication.SupabaseJWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }
 
 
