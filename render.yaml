@@ -8,7 +8,7 @@ services:
     plan: free
     # Keep this close to your Supabase project's region (e.g. Supabase
     # us-west-1 -> oregon, us-east-1 -> virginia); every query crosses it.
-    region: oregon
+    region: virginia
     rootDir: djangobackend
     buildCommand: ./build.sh
     startCommand: gunicorn djangobackend.wsgi:application
