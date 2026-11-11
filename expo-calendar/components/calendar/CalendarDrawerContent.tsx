@@ -5,6 +5,7 @@ import { Pressable, View } from 'react-native';
 import { Icon } from '@/components/nativewindui/Icon';
 import { Text } from '@/components/nativewindui/Text';
 import { Toggle } from '@/components/nativewindui/Toggle';
+import { supabase } from '@/lib/supabase';
 import { useColorScheme } from '@/lib/useColorScheme';
 import { useGetCalendarsQuery } from '@/store/api';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -15,6 +16,7 @@ export function CalendarDrawerContent(props: DrawerContentComponentProps) {
   const { colors } = useColorScheme();
   const dispatch = useAppDispatch();
   const hiddenCalendarIds = useAppSelector((state) => state.ui.hiddenCalendarIds);
+  const email = useAppSelector((state) => state.auth.user?.email);
 
   return (
     <View className="flex-1 bg-background">
@@ -62,6 +64,18 @@ export function CalendarDrawerContent(props: DrawerContentComponentProps) {
           <Icon name="plus" size={18} color={colors.primary} />
           <Text className="font-medium" style={{ color: colors.primary }}>
             New Calendar
+          </Text>
+        </Pressable>
+      </View>
+
+      <View className="flex-row items-center justify-between gap-3 border-t border-border px-4 py-3">
+        <Text variant="footnote" color="tertiary" className="flex-1" numberOfLines={1}>
+          {email}
+        </Text>
+        {/* The route guards in app/_layout.tsx send us back to login. */}
+        <Pressable onPress={() => supabase.auth.signOut()} className="active:opacity-70">
+          <Text className="font-medium" style={{ color: colors.destructive }}>
+            Sign Out
           </Text>
         </Pressable>
       </View>

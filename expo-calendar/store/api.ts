@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 import { API_BASE_URL } from '@/lib/api-config';
 
+import type { RootState } from './index';
 import type { Calendar, CalendarInput, Event, EventInput, User, UserInput } from './types';
 
 // Routes come from the DRF DefaultRouter in djangobackend/backend_api/urls.py,
@@ -19,7 +20,17 @@ function provideList<T extends string>(type: T, items: { id: number }[] | undefi
 
 export const api = createApi({
   reducerPath: 'api',
-  baseQuery: fetchBaseQuery({ baseUrl: API_BASE_URL }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: API_BASE_URL,
+    // Send the Supabase access token so Django can verify who's calling.
+    prepareHeaders: (headers, { getState }) => {
+      const token = (getState() as RootState).auth.accessToken;
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+      }
+      return headers;
+    },
+  }),
   tagTypes: ['User', 'Calendar', 'Event'],
   endpoints: (build) => ({
     // Users
